@@ -1,7 +1,7 @@
 "experience_id","position_id","name","description","hyperlink","start_date","end_date"
-"1","1","CSE 477","Taught an introductory course on web application design.","https://www.youtube.com/@ghassemi",NULL,NULL
-"2","1","CSE 847","Taught a hands-on introduction to Natural Language Processing.","https://www.youtube.com/@ghassemi",NULL,NULL
-"3","2","Feature Imitating Networks","Developed a new kind of neural network that is better faster and stronger.","https://ghassemi.xyz","2020-01-01",NULL
-"4","3","BRAINWORKS","Developed a platform to organize the scientific literature as a knowledge graph.","https://github.com/deskool/brainworks-public","2020-01-01",NULL
-"5","3","BRIDGE2AI","Developed a $100M initiative to assist with AI research.","https://commonfund.nih.gov/bridge2ai","2020-01-01",NULL
-"6","1","CSE 491","Taught a hands-on introduction to AI Agents.",NULL,NULL,NULL
+"1","1","Masar Educational Platform","Built high-performance ASP.NET Core Web APIs and Blazor WebAssembly features for an educational platform including Stripe payments, teacher APIs, deployment, and backend optimization.",NULL,"2025-08-01","2025-12-31"
+"2","1","Bookify","Designed and developed a scalable multi-vendor marketplace using ASP.NET Core Web API and Blazor WebAssembly with JWT authentication, SignalR, Stripe payments, analytics dashboards, and role-based authorization.","https://github.com/mohammedrh21/Bookify","2025-01-01",NULL
+"3","1","NexCommerce","Built a scalable multi-vendor marketplace using ASP.NET Core Web API and Blazor WebAssembly with JWT authentication, SignalR, optimized APIs, analytics dashboard, and vendor management.","https://github.com/mohammedrh21/NexCommerce","2025-02-01",NULL
+"4","3","Tasha Mobile Application","Developed booking management REST APIs using ASP.NET Core, Dapper, ADO.NET, SQL Server, and MVC while improving backend performance.",NULL,"2022-01-01","2022-03-31"
+"5","4","Accessline Enterprise Applications","Developed enterprise ASP.NET Core MVC applications and REST APIs using Clean Architecture while improving performance, maintainability, testing, and deployment.",NULL,"2021-11-01","2022-12-31"
+"6","2","Bachelor of Science in Computer Systems Engineering","Completed a Bachelor's degree in Computer Systems Engineering with coursework in Software Engineering, Databases, Web Development, Object-Oriented Programming, and Software Architecture.",NULL,"2019-09-01","2025-06-30"

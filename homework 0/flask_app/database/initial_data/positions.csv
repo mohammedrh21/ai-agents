@@ -1,5 +1,5 @@
 "position_id","inst_id","title","responsibilities","start_date","end_date"
-"1","1","Instructor","Teach classes; mostly NLP and Web design.","2019-01-01",NULL
-"2","1","Researcher","Perform research at interface of AI and healthcare.","2019-01-01",NULL
-"3","2","National Scholar","Helped the government plan the future of science","2021-01-01","2021-12-31"
-"4","3","Associate Director","Used data science to assess corporation and nations","2019-01-01","2020-01-01"
+"1","1","Full Stack ASP.NET Core & Blazor WebAssembly Developer","Built scalable ASP.NET Core Web APIs, Blazor WebAssembly applications, Stripe payment integration, teacher APIs, database design, deployment, and backend optimization.","2025-08-01","2025-12-31"
+"2","2","Bachelor of Science Student","Completed a Bachelor's degree in Computer Systems Engineering while studying software engineering, databases, web development, and object-oriented programming.","2019-09-01","2025-06-30"
+"3","3","ASP.NET Core Developer","Developed RESTful APIs, MVC admin dashboard, optimized SQL queries, and collaborated with mobile developers.","2022-01-01","2022-03-31"
+"4","4","ASP.NET Core Developer","Developed ASP.NET Core MVC applications, REST APIs, Clean Architecture solutions, optimized legacy systems, testing, deployment, and technical documentation.","2021-11-01","2022-12-31"
