@@ -21,9 +21,10 @@ HOW EVENTS WORK:
 from flask_socketio import emit
 from flask_app import socketio
 from flask_app.utils.llm import send_message
+from flask import current_app
 
 # This is set by create_app() in __init__.py so this file can use the database.
-db = None
+
 
 
 @socketio.on('send_message')
@@ -46,6 +47,8 @@ def handle_message(data):
     #           How would you send a reply only to the user who asked?
     #           Hint: look up 'rooms' in the Flask-SocketIO documentation.
     """
+    db = current_app.db
+    ai_response = handle_ai_chat_request(db, role="Orchestrator", message=user_message)
     user_message = data.get('message', '').strip()
 
     if not user_message:

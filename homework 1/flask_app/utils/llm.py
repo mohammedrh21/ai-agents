@@ -26,8 +26,49 @@ OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 # See all available models at: https://openrouter.ai/models
 # QUESTION: What would change if you switched to a different model?
 #           Try 'google/gemma-2-9b-it:free' or 'mistralai/mistral-7b-instruct:free'.
-DEFAULT_MODEL = "nvidia/nemotron-3-super-120b-a12b:free"
+DEFAULT_MODEL = "openai/gpt-4o-mini"
+from jinja2 import Template
 
+# One shared template for every expert's system prompt. Each expert just
+# fills in different values for role/domain/instructions/context/examples.
+#
+# We use Jinja2 here (not manual string replacement) because it's already a
+# Flask dependency — it's the exact same {{ }} / {% if %} syntax you've been
+# reading in resume.html, just rendering a prompt string instead of a page.
+MASTER_TEMPLATE = Template("""\
+You are a {{ role }}, an expert in {{ domain }}.
+
+{{ specific_instructions }}
+{% if background_context %}
+Context:
+{{ background_context }}
+{% endif %}
+{% if few_shot_examples %}
+Examples:
+{{ few_shot_examples }}
+{% endif %}
+Request: {{ request }}
+""", trim_blocks=True, lstrip_blocks=True)
+
+
+def fill_template(role, domain, specific_instructions, request,
+                   background_context="", few_shot_examples=""):
+    """
+    Render MASTER_TEMPLATE into one expert's full system prompt.
+
+    background_context and few_shot_examples are optional: the {% if %}
+    blocks above drop the whole section — header included — when the
+    argument is empty, instead of leaving a dangling "Context:" with
+    nothing underneath it.
+    """
+    return MASTER_TEMPLATE.render(
+        role=role,
+        domain=domain,
+        specific_instructions=specific_instructions,
+        background_context=background_context,
+        few_shot_examples=few_shot_examples,
+        request=request,
+    ).strip()
 
 def send_message(user_message, system_prompt="You are a helpful assistant."):
     """
@@ -100,3 +141,6 @@ def send_message(user_message, system_prompt="You are a helpful assistant."):
         return f"⚠️ Unexpected response from OpenRouter: {result}"
 
     return result['choices'][0]['message']['content']
+
+print(fill_template("Tester", "testing", "Say hi.", "Hello?"))
+

@@ -54,6 +54,8 @@ def create_app():
     db.createTables(purge=True)
     print("Database ready.")
 
+    app.db = db
+
     # Connect Socket.IO to the Flask app
     socketio.init_app(app)
 
@@ -62,11 +64,6 @@ def create_app():
     with app.app_context():
         from flask_app import routes
         from flask_app.utils import socket_events
-
-        # Inject the database into the routes and socket_events modules
-        # so they can query it without creating a new connection each time.
-        routes.db = db
-        socket_events.db = db
 
     # Prevent browsers from caching old versions of pages during development
     @app.after_request
