@@ -1,0 +1,5 @@
+"inst_id","type","name","department","address","city","state","zip"
+"1","Industry","Masar Educational Platform",NULL,"Remote",NULL,NULL,NULL
+"2","Academia","Al-Azhar University","Computer Systems Engineering",NULL,"Gaza","Palestine",NULL
+"3","Industry","Tasha Mobile Application",NULL,NULL,NULL,"Remote",NULL
+"4","Industry","Accessline Technology Investment Company",NULL,NULL,"Gaza","Palestine",NULL
