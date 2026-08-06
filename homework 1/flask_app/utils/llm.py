@@ -16,7 +16,7 @@ KEY CONCEPTS:
 
 import os
 import requests
-
+import re
 # The URL we send our messages to.
 # OpenRouter acts as a single gateway to many different AI models.
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
@@ -142,5 +142,112 @@ def send_message(user_message, system_prompt="You are a helpful assistant."):
 
     return result['choices'][0]['message']['content']
 
-print(fill_template("Tester", "testing", "Say hi.", "Hello?"))
+# print(fill_template("Tester", "testing", "Say hi.", "Hello?"))
 
+def handle_ai_chat_request(db, role, message):
+    """
+    Route a chat message to the named expert. role=None keeps Homework 0's
+    original single-prompt behavior as a fallback, so nothing about the
+    basic chat flow breaks while you're building this out.
+    """
+    if role is None:
+        return send_message(message)
+
+    config = db.getLLMRoles()[role]
+    background_context = config['background_context'] or ""
+    if role == "Content Expert":
+        # No page-scraping in this stack -- "current page content" is the
+        # resume data itself, fetched fresh on every request.
+        background_context += "\n" + db.getResumeText()
+
+    system_prompt = fill_template(
+        role=config['role'],
+        domain=config['domain'],
+        specific_instructions=config['specific_instructions'],
+        background_context=background_context,
+        few_shot_examples=config['few_shot_examples'] or "",
+        request=message,
+    )
+    output = send_message(message, system_prompt).strip()
+    print(f"[{role}] generated:\n{output}\n")   # the rubric checks this output
+
+    if role == "Database Read Expert":
+        return execute_read_query(db, output)
+    if role == "Database Write Expert":
+        return execute_write_action(db, output)
+    if role == "Orchestrator":
+        return run_orchestrator_plan(db, message, output)
+    return output   # Content Expert -- output is already the final answer
+
+def execute_read_query(db, sql):
+    """
+    Run the Database Read Expert's generated SQL. We refuse anything that
+    isn't a SELECT -- this expert is read-only by design, so there's never
+    a legitimate reason to run anything else, even if a user's message
+    somehow tricks the model into generating something else.
+    """
+    if not sql.strip().upper().startswith("SELECT"):
+        return "Sorry, I couldn't safely answer that question."
+    try:
+        return str(db.query(sql))
+    except Exception as error:
+        print(f"Read Expert query failed: {error}")
+        return "Sorry, that question couldn't be answered."
+
+def execute_write_action(db, generated_code):
+    """
+    Run the Database Write Expert's generated Python. This genuinely
+    executes model-generated code with exec() -- see "Questions to Think
+    About" below for why that's worth pausing on. `db` is the only thing
+    exposed to it.
+
+    `outcome` is how the generated code reports back what happened -- it's
+    already the full, exact message to show the user (see Step 2), not a
+    bare status, because only the generated code knows which table/element
+    it actually touched.
+
+    NULL=None is a compatibility shim: the model sometimes writes SQL's
+    NULL instead of Python's None for a missing value. Python has no NULL,
+    so without this, that one habit would crash otherwise-correct code
+    with a NameError.
+    """
+    local_vars = {}
+    try:
+        exec(generated_code, {"db": db, "NULL": None}, local_vars)
+    except Exception as error:
+        print(f"Write Expert code failed: {error}")
+        return "Operation was unsuccessful."
+    return local_vars.get("outcome", "Operation was unsuccessful.")
+
+def run_orchestrator_plan(db, original_request, plan_text):
+    """
+    Parse the Orchestrator's plan (a Python list of call strings), run each
+    expert call in order, then make one final call to turn the raw results
+    into a single clean reply for the chat UI.
+    """
+    try:
+        call_strings = eval(plan_text)   # the Orchestrator's own list literal
+    except Exception:
+        print(f"Orchestrator returned an unparseable plan: {plan_text}")
+        return "Sorry, I couldn't plan a response to that."
+
+    results = []
+    for call_string in call_strings:
+        print(f"[Orchestrator] executing: {call_string}")
+        match = re.search(r'role="([^"]*)",\s*message="([^"]*)"', call_string)
+        role, message = match.group(1), match.group(2)
+        response = handle_ai_chat_request(db, role, message)
+        results.append((role, message, response))
+
+    steps_summary = "\n".join(f"{r}: {resp}" for r, m, resp in results)
+    synthesis_prompt = (
+        f'The user asked: "{original_request}"\n\n'
+        f"Here is what each expert found or did:\n{steps_summary}\n\n"
+        "Write ONE short, clear reply. A Database Write Expert step's result "
+        "is already the exact message to show the user (e.g. 'New Python "
+        "added to the skills table.') -- if one is present, reuse it "
+        "verbatim rather than rephrasing it. Otherwise, summarize the "
+        "other results in plain language. Never mention SQL, Python, code, "
+        "or these internal steps."
+    )
+    return send_message(original_request, synthesis_prompt)
